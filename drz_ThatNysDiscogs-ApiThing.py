@@ -1,6 +1,7 @@
 """_summary_
 """
 import csv
+import re
 import gzip
 import sys
 import discogs_client
@@ -11,16 +12,72 @@ MAX_HAVES = 150
 
 
 l = []
-tmp = {}
 labels = {}
 
 def main():
 
     read_csv()
-    i = len(l)
+    # handle_xml()
+
+def read_csv():
+
+    with open('Labels(RELEASES:125-375)(YEARS:Last 15).csv','r' , newline='', encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        print('Reading file...')
+        for row in reader:
+            update_labels(row)
+
+def update_labels(label: dict):
+
+    labels.update(
+        {
+            label['Label']: {
+                "first": label['First'],
+                "last": label['Last'],
+                "releases": handle_releases(label['Releases']),
+            }
+        }
+    )
+    
+    
+def handle_releases(_: str):
+    
+    
+    l.append(_)
+    if len(l) <= 1:
+        sys.exit(print(l[0]))
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    # ratio = 0
+
+    # _ = dscg.label(label['id'])
+    # pages = _.releases.pages
+    # for i in range(pages):
+    #     # pprint.pp(f'\n PAGE {i+1} OF {pages}\n{label.releases.page(i)}')
+    #     for release in _.releases.page(i):
+    #         print(release)
+    #         r_id = release.id
+    #         time.sleep(1)
+    #         handle_ratio(r_id, ratio)
+    #         print(f'{int(tmp[label['name']]['releases']) -1} releases left')
+    # label['ratio'] = ratio
+    # if label['ratio']/tmp[label['name']]['releases'] >= 0.33:
+    #     build_labels(label)
+
+
+def handle_xml():
+
     try:
         xmltodict.parse(
-            gzip.open(input("XML.GZ Filename: ") or "discogs_20240701_labels.xml.gz"),
+            gzip.open(input("XML.GZ Filename: ") or "labels(RELEASES:125-375)(YEARS:Last 15).csv"),
             item_depth=2,
             item_callback=handle_data,
         )
@@ -29,26 +86,9 @@ def main():
         main()
     except KeyboardInterrupt:
         sys.exit("KeyboardInterupt Detected")
-    print(i)
-    print(f'{round((len(l)/i)*100)}% Mess')
 
 
-def read_csv():
 
-    with open(f'{input('CSV Filename: ')}.csv','r' , newline='', encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-        print('Reading file...')
-        for row in reader:
-            l.append(row['Label'])
-            tmp.update(
-                {
-                    row['Label']: {
-                        'first': row['First'],
-                        'last': row['Last'],
-                        'releases': row['Releases'],
-                    }
-                }
-            )
 
 
 def handle_data(__, d: dict):
@@ -79,24 +119,6 @@ def handle_data(__, d: dict):
     return True
 
 
-def handle_discogs(label: dict):
-    ratio = 0
-    dscg = discogs_client.Client(
-        "ThatNysDiscogsThing/0.1", user_token="XKlIMSpbhzxCWlOUlXgZHYXfxiXXphYnMPFaAuyB"
-    )
-    _ = dscg.label(label['id'])
-    pages = _.releases.pages
-    for i in range(pages):
-        # pprint.pp(f'\n PAGE {i+1} OF {pages}\n{label.releases.page(i)}')
-        for release in _.releases.page(i):
-            print(release)
-            r_id = release.id
-            time.sleep(1)
-            handle_ratio(r_id, ratio)
-            print(f'{int(tmp[label['name']]['releases']) -1} releases left')
-    label['ratio'] = ratio
-    if label['ratio']/tmp[label['name']]['releases'] >= 0.33:
-        build_labels(label)
 
 
 def handle_ratio(r_id:int, ratio: int):
