@@ -80,6 +80,7 @@ def update_labels(label: str, released: int, r_id: int):
             }
         }
     )
+    print(f'Updated label, {len(labels)} labels found...of the 1097595')
 
 
 def handle_first_release(label: str, released: int):
@@ -97,7 +98,6 @@ def handle_first_release(label: str, released: int):
             return labels[label]["first"]
     except KeyError:
         pass
-    print_anything()
     return released
 
 
@@ -116,7 +116,6 @@ def handle_last_release(label: str, released: int):
             return labels[label]["last"]
     except KeyError:
         pass
-    print_anything()
     return released
 
 
@@ -184,7 +183,7 @@ def past_years_csv(noes: list):
         first = _["first"]
         last = _["last"]
         releases = _["releases"]
-        if last < (current_year - y) or r_min > len(releases) > r_max:
+        if last < (current_year - y) and r_min > len(releases) > r_max:
             print('Label passed!')
         else:
             ratio = handle_ratio(releases, h_max)
@@ -225,7 +224,7 @@ def between_years_csv(noes: list):
         first = _["first"]
         last = _["last"]
         releases = _["releases"]
-        if first < y_min and last > y_max or r_min > len(releases) > r_max:
+        if first < y_min and last > y_max and r_min > len(releases) > r_max:
             print('Label passed!')
         else:
             ratio = handle_ratio(releases, h_max)
@@ -265,7 +264,7 @@ def between_years_csv2(noes: list):
         first = _["first"]
         last = _["last"]
         releases = _["releases"]
-        if first < y_min and last > y_max or r_min > len(releases) > r_max:
+        if first < y_min and last > y_max and r_min > len(releases) > r_max:
             print('Label passed!')
         else:
             ratio = handle_ratio(releases, h_max)
@@ -313,13 +312,6 @@ def handle_ratio(releases: list, h_max: int):
             return False
         print(f'{count} releases left...')
 
-
-
-# GIV MOAR OPTIONS, but later!
-def print_anything():
-    """Low effort function to print a thing
-    """    
-    print(f'Updated label, {len(labels)} labels found...')
 
 if __name__ == "__main__":
     main()
