@@ -1,4 +1,4 @@
-"""The Pylint-thing wants this for whatever usefullness that eludes me at this point in time!"""
+"""The Pylint-thing wants this for whatever usefullness that eludes me at this point in time"""
 
 from datetime import datetime
 import os
@@ -14,18 +14,18 @@ xml_dict = {}
 
 
 def main():
-    """Match input to redirect somewhere!"""
+    """Match input to function"""
     # LOOK UP ARGPARSE STUFF!
     while True:
         match input(
-            "Input:\n-u: Update from XML\n-c: Create a CSV\n-e: Exit\n"
+            "Input:\n- u: Update from XML\n- c: Create a CSV\n- e: Exit\n"
         ) or sys.argv[1]:
-            case "-u":
+            case "u":
                 select_xml()
-            case "-c":
+            case "c":
                 pickle_dict()
                 handle_csv()
-            case "-e":
+            case "e":
                 sys.exit(0)
             case _:
                 print("Invalid input.")
@@ -38,7 +38,7 @@ def select_xml():
         print(f"{i}) {s}")
     if not l:
         sys.exit(
-            "No releases.xml.gz file found!\nGet one from:\nshttps://discogs-data-dumps.s3.us-west-2.amazonaws.com/index.html"
+            "No releases.xml.gz file found!\nMaybe get one from:\nhttps://discogs-data-dumps.s3.us-west-2.amazonaws.com/index.html"
         )
     try:
         handle_xml(l[int(input("Select file: ")) - 1])
@@ -50,7 +50,7 @@ def select_xml():
 
 
 def handle_xml(filename: str):
-    """Dig trough the .xml parsingly!
+    """Dig trough the .xml, parsingly
 
     Args:
         filename (str): Some file's name
@@ -60,7 +60,6 @@ def handle_xml(filename: str):
     """
     try:
         xmltodict.parse(
-            # research if possible to use regex to find the file and ask to confirm
             gzip.open(filename),
             item_depth=2,
             item_callback=handle_data,
@@ -90,7 +89,7 @@ def handle_data(l: list, d: dict):
     """
     try:
         released = int(d["released"].split("-")[0])
-    # check for better way to catch all errors except exit-things but this is fine, for now-ish
+    # check for better way to catch all errors except exit-things but this is fine, for now...-ish
     except Exception:
         return True
     r_id = l[1][1]["id"]
@@ -210,64 +209,28 @@ def pickle_dict():
 
 def handle_csv():
     """Summons some .csv!"""
-    if input("Use defaults? ").casefold().startswith("y"):
-        try:
-            exclude = {"now": datetime.now().year, "excl": 15}
-            between = {"min": 1980, "max": 2005}
-            a = {"min": 125, "max": 375}
-            b = {"min": 5, "max": 10}
-            c = {"min": 11, "max": 25}
 
-        except ValueError:
-            if input("Do you want to try this again? ").casefold().startswith("n"):
-                main()
-            handle_csv()
-    else:
-        # MAKE THIS and ADJUST REST LATER
-        ...
+    # IMPROVE INPUT DESCRIPTIONS
+    exclude = {"now": datetime.now().year, "excl": input("Exclude: ")}
+    between = {"min": input("Between Min: "), "max": input("Between Max: ")}
+    releases = {"min": input("Releases Min: "), "max": input("Releases Max: ")}
     count = 0
+    
     for label, _ in xml_dict.items():
         first = _["first"]
         last = _["last"]
         rels = _["releases"]
         r_total = len(rels)
         discogs = _["discogs"]
-        if a["min"] < r_total < a["max"] and last < (exclude["now"] - exclude["excl"]):
-            ratio = handle_ratio(rels)
-            if ratio is True:
-                with open(
-                    f"ThatNysThing|Between_{a['min']}_and_{a['max']}_releases|Exclude_last_{exclude['excl']}_years)_since_{exclude['now']}.csv",
-                    "a",
-                    encoding="utf-8",
-                ) as f:
-                    writer = csv.DictWriter(
-                        f,
-                        fieldnames=[
-                            "Label",
-                            "First",
-                            "Last",
-                            "Releases",
-                            "Discogs",
-                        ],
-                    )
-                    writer.writerow(
-                        {
-                            "Label": label,
-                            "First": first,
-                            "Last": last,
-                            "Releases": r_total,
-                            "Discogs": discogs,
-                        }
-                    )
-
+        
         if first < between["min"] or last > between["max"]:
             pass
         else:
-            if b["min"] < r_total < b["max"]:
+            if releases["min"] < r_total < releases["max"] and last < (exclude["now"] - exclude["excl"]):
                 ratio = handle_ratio(rels)
                 if ratio is True:
                     with open(
-                        f"ThatNysThing|Between_{b['min']}_and_{b['max']}_releases|From_{between['min']}_to_{between['max']}).csv",
+                        f"ThatNysThing|Between_{releases['min']}_and_{releases['max']}_releases|Exclude_last_{exclude['excl']}_years)_since_{exclude['now']}.csv",
                         "a",
                         encoding="utf-8",
                     ) as f:
@@ -290,38 +253,8 @@ def handle_csv():
                                 "Discogs": discogs,
                             }
                         )
-                else:
-                    pass
-
-            elif c["min"] < r_total < c["max"]:
-                ratio = handle_ratio(rels)
-                if ratio is True:
-                    with open(
-                        f"ThatNysThing|Between_{c['min']}_and_{c['max']}_releases|From_{between['min']}_to_{between['max']}).csv",
-                        "a",
-                        encoding="utf-8",
-                    ) as f:
-                        writer = csv.DictWriter(
-                            f,
-                            fieldnames=[
-                                "Label",
-                                "First",
-                                "Last",
-                                "Releases",
-                                "Discogs",
-                            ],
-                        )
-                        writer.writerow(
-                            {
-                                "Label": label,
-                                "First": first,
-                                "Last": last,
-                                "Releases": r_total,
-                                "Discogs": discogs,
-                            }
-                        )
-                else:
-                    pass
+            else:
+                pass
         count += 1
         print(f"{count} / {len(xml_dict)}")
 
@@ -336,7 +269,7 @@ def handle_ratio(rels: list):
     Returns:
         bool: Deciding whether some row gets written
     """
-    # LOOK TO MAKE THIS SAVE THE RATIOS AS TO AVOID THE LENGTHY SHIIT
+    # LOOK TO MAKE THIS SAVE THE RATIOS AS TO AVOID THE LENGTHY STUFFS
     ratio = 0
     total = len(rels)
     count = total
@@ -350,7 +283,7 @@ def handle_ratio(rels: list):
             release = dscg.release(r_id)
             haves = release.fetch("community")["have"]
             wants = release.fetch("community")["want"]
-        # check for better way to catch all errors except exit-things but this is fine, for now-ish
+        # check for better way to catch all errors except exit-things but this is fine, for now...-ish
         except Exception:
             pass
         if wants > haves and haves <= max_haves:
@@ -363,7 +296,7 @@ def handle_ratio(rels: list):
             print("This one failed!")
             return False
         print(f"{count} releases left... Ratio: {ratio}")
-        # Slow down request speed 'cause whiny API
+        # Slow down request speed 'cause DiscogsAPI forces it
         time.sleep(0.9)
 
 
