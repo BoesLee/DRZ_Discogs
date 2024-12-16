@@ -18,11 +18,11 @@ def main():
     # LOOK UP ARGPARSE STUFF!
     while True:
         match input(
-            "Input:\n- u: Update from XML\n- c: Create a CSV\n- e: Exit\n"
+            "Input:\n-> c: Create from .xml.gz\n-> r: Resume from .dict\n-> e: Exit\n"
         ) or sys.argv[1]:
-            case "u":
-                select_xml()
             case "c":
+                select_xml()
+            case "r":
                 pickle_dict()
                 handle_csv()
             case "e":
@@ -35,7 +35,7 @@ def select_xml():
     """Select some .xml!"""
     l = [f for f in os.listdir("./") if f.endswith("releases.xml.gz")]
     for i, s in enumerate(l, start=1):
-        print(f"{i}) {s}")
+        print(f"{i}: {s}")
     if not l:
         sys.exit(
             "No releases.xml.gz file found!\nMaybe get one from:\nhttps://discogs-data-dumps.s3.us-west-2.amazonaws.com/index.html"
@@ -96,13 +96,19 @@ def handle_data(l: list, d: dict):
     _ = d["labels"]["label"]
     if isinstance(_, dict):
         label = _["@name"]
-        l_id = _["@id"]
+        try:
+            l_id = _["@id"]
+        except KeyError:
+            l_id = "Error: KeyError"
         update_dict(label, released, r_id, l_id)
     else:
         tmp = []
         for __, value in enumerate(_):
             if value["@name"] not in tmp:
-                tmp.append([value["@name"], value["@id"]])
+                try:
+                    tmp.append([value["@name"], value["@id"]])
+                except KeyError:
+                    tmp.append([value["@name"], "Error: KeyError"])
         for __, label in enumerate(tmp):
             update_dict(label[0], released, r_id, label[1])
     return True
@@ -195,7 +201,7 @@ def pickle_dict():
     """Do stuff with pickle dict!"""
     l = [f for f in os.listdir("./") if f.endswith(".dict")]
     for i, s in enumerate(l, start=1):
-        print(f"{i}) {s}")
+        print(f"{i}: {s}")
     if not l:
         print("No dictionaries fount.\nRedirecting...")
         select_xml()
@@ -211,9 +217,8 @@ def handle_csv():
     """Summons some .csv!"""
 
     # IMPROVE INPUT DESCRIPTIONS
-    exclude = {"now": datetime.now().year, "excl": input("Exclude: ")}
-    between = {"min": input("Between Min: "), "max": input("Between Max: ")}
-    releases = {"min": input("Releases Min: "), "max": input("Releases Max: ")}
+    between = {"min": int(input("Between Min: ")), "max": int(input("Between Max: "))}
+    releases = {"min": int(input("Releases Min: ")), "max": int(input("Releases Max: "))}
     count = 0
     
     for label, _ in xml_dict.items():
@@ -226,11 +231,11 @@ def handle_csv():
         if first < between["min"] or last > between["max"]:
             pass
         else:
-            if releases["min"] < r_total < releases["max"] and last < (exclude["now"] - exclude["excl"]):
+            if releases["min"] < r_total < releases["max"]:
                 ratio = handle_ratio(rels)
                 if ratio is True:
                     with open(
-                        f"ThatNysThing|Between_{releases['min']}_and_{releases['max']}_releases|Exclude_last_{exclude['excl']}_years)_since_{exclude['now']}.csv",
+                        f"ThatNysThing|From_{between['min']}_to_{between['max']}|Between_{releases['min']}_and_{releases['max']}_releases.csv",
                         "a",
                         encoding="utf-8",
                     ) as f:

@@ -1,5 +1,4 @@
 # DRZ_Discogs
-
 Parse Discogs Data dump
 
 Discogs data dumps available under the the CC0 No Rights Reserved license.
