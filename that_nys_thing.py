@@ -190,7 +190,7 @@ def handle_r_id(label: str, r_id: str):
 def save_dict():
     """Dump labels dict"""
     try:
-        with open(input("Save as: ")+(".dict"), "wb") as _:
+        with open(input("Save as: ") + (".dict"), "wb") as _:
             pickle.dump(xml_dict, _)
         _.close()
     except FileNotFoundError:
@@ -218,16 +218,19 @@ def handle_csv():
 
     # IMPROVE INPUT DESCRIPTIONS
     between = {"min": int(input("Between Min: ")), "max": int(input("Between Max: "))}
-    releases = {"min": int(input("Releases Min: ")), "max": int(input("Releases Max: "))}
+    releases = {
+        "min": int(input("Releases Min: ")),
+        "max": int(input("Releases Max: ")),
+    }
     count = 0
-    
+
     for label, _ in xml_dict.items():
         first = _["first"]
         last = _["last"]
         rels = _["releases"]
         r_total = len(rels)
         discogs = _["discogs"]
-        
+
         if first < between["min"] or last > between["max"]:
             pass
         else:
