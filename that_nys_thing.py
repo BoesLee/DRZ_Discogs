@@ -217,12 +217,17 @@ def handle_csv():
     """Summons some .csv!"""
 
     # IMPROVE INPUT DESCRIPTIONS
-    between = {"min": int(input("Between Min: ")), "max": int(input("Between Max: "))}
-    releases = {
-        "min": int(input("Releases Min: ")),
-        "max": int(input("Releases Max: ")),
-    }
-    max_haves = input("Max Haves: ")
+    print("Use integers only")
+    try:
+        between = {"min": int(input("Between Min: ")), "max": int(input("Between Max: "))}
+        releases = {
+            "min": int(input("Releases Min: ")),
+            "max": int(input("Releases Max: ")),
+        }
+        max_haves = int(input("Max Haves: "))
+        ratio_treshold = int(input("Ratio Treshold: "))
+    except ValueError:
+        handle_csv()
     count = 0
 
     for label, _ in xml_dict.items():
@@ -236,7 +241,7 @@ def handle_csv():
             pass
         else:
             if releases["min"] < r_total < releases["max"]:
-                ratio = handle_ratio(rels, max_haves)
+                ratio = handle_ratio(rels, max_haves, ratio_treshold)
                 if ratio is True:
                     with open(
                         f"ThatNysThing|From_{between['min']}_to_{between['max']}|Between_{releases['min']}_and_{releases['max']}_releases.csv",
@@ -268,7 +273,7 @@ def handle_csv():
         print(f"{count} / {len(xml_dict)}")
 
 
-def handle_ratio(rels: list, max_haves: int):
+def handle_ratio(rels: list, max_haves: int, ratio_treshold: int ):
     """Calculates some label's release's ratio
 
     Args:
@@ -283,7 +288,6 @@ def handle_ratio(rels: list, max_haves: int):
     ratio = 0
     total = len(rels)
     count = total
-    max_haves = 150
     print(f"Going trough {len(rels)} releases for this label!")
     dscg = discogs_client.Client(
         "ThatNysDiscogsThing/0.1", user_token="XKlIMSpbhzxCWlOUlXgZHYXfxiXXphYnMPFaAuyB"
@@ -299,13 +303,13 @@ def handle_ratio(rels: list, max_haves: int):
         if wants > haves and haves <= max_haves:
             ratio += 1
         count -= 1
-        if ratio >= round(total / 3):
+        if ratio >= round(total / ratio_treshold):
             print("Great succes!")
             return True
-        if (count + ratio) < round(total / 3):
+        if (count + ratio) < round(total / ratio_treshold):
             print("This one failed!")
             return False
-        print(f"{count} releases left... Ratio: {ratio}")
+        print(f"{count} releases left... Ratio: {ratio} out of {total}")
         # Slow down request speed 'cause DiscogsAPI forces it
         time.sleep(0.9)
 
