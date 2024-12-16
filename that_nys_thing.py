@@ -222,6 +222,7 @@ def handle_csv():
         "min": int(input("Releases Min: ")),
         "max": int(input("Releases Max: ")),
     }
+    max_haves = input("Max Haves: ")
     count = 0
 
     for label, _ in xml_dict.items():
@@ -235,7 +236,7 @@ def handle_csv():
             pass
         else:
             if releases["min"] < r_total < releases["max"]:
-                ratio = handle_ratio(rels)
+                ratio = handle_ratio(rels, max_haves)
                 if ratio is True:
                     with open(
                         f"ThatNysThing|From_{between['min']}_to_{between['max']}|Between_{releases['min']}_and_{releases['max']}_releases.csv",
@@ -267,7 +268,7 @@ def handle_csv():
         print(f"{count} / {len(xml_dict)}")
 
 
-def handle_ratio(rels: list):
+def handle_ratio(rels: list, max_haves: int):
     """Calculates some label's release's ratio
 
     Args:
@@ -278,6 +279,7 @@ def handle_ratio(rels: list):
         bool: Deciding whether some row gets written
     """
     # LOOK TO MAKE THIS SAVE THE RATIOS AS TO AVOID THE LENGTHY STUFFS
+    # MAKE THE MAX HAVES USER INPUT VARIABLE
     ratio = 0
     total = len(rels)
     count = total
