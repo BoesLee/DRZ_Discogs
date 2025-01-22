@@ -284,7 +284,6 @@ def handle_ratio(rels: list, max_haves: int, ratio_treshold: int ):
         bool: Deciding whether some row gets written
     """
     # LOOK TO MAKE THIS SAVE THE RATIOS AS TO AVOID THE LENGTHY STUFFS
-    # MAKE THE MAX HAVES USER INPUT VARIABLE
     ratio = 0
     total = len(rels)
     count = total
