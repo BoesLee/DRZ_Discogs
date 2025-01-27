@@ -1,6 +1,5 @@
 """The Pylint-thing wants this for whatever usefullness that eludes me at this point in time"""
 
-from datetime import datetime
 import os
 import time
 import csv
@@ -296,8 +295,8 @@ def handle_ratio(rels: list, max_haves: int, ratio_treshold: int ):
             release = dscg.release(r_id)
             haves = release.fetch("community")["have"]
             wants = release.fetch("community")["want"]
-        # check for better way to catch all errors except exit-things but this is fine, for now...-ish
-        except Exception:
+        # check for better way to catch all errors except exit-things but this is fine, for now...
+        finally:
             pass
         if wants > haves and haves <= max_haves:
             ratio += 1
