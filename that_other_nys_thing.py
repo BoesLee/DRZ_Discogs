@@ -52,7 +52,7 @@ def discogs(artist: str, title: str):
     for i in range(results.pages):
         for _ in results.page(i):
             try:
-                release = _
+                release = _.title
             except Exception:
                 pass
             try:
@@ -63,7 +63,10 @@ def discogs(artist: str, title: str):
                 tracklist = _.tracklist
             except Exception:
                 pass
-            write_csv(title, release, formats, tracklist)
+            try:
+                write_csv(title, release, formats, tracklist)
+            except UnboundLocalError:
+                write_csv(title)
 
 
 def write_csv(
@@ -77,24 +80,25 @@ def write_csv(
         formats (list, optional): _description_. Defaults to None.
         tracklist (list, optional): _description_. Defaults to None.
     """
-    file_exists = os.path.isfile("ThatOtherNysThing.csv")
+    output = str("Output | ThatOtherNysThing.csv")
+    file_exists = os.path.isfile(output)
     with open(
-        "ThatOtherNysThing.csv",
+        output,
         "a",
         encoding="utf-8",
     ) as f:
         w = csv.DictWriter(
             f,
-            fieldnames=["title", "release", "format", "tracklist"],
+            fieldnames=["Title", "Release", "Format", "Tracklist"],
         )
         if not file_exists:
             w.writeheader()
         w.writerow(
             {
-                "title": title,
-                "release": release if release is not None else "",
-                "format": formats if formats is not None else "",
-                "tracklist": list(tracklist) if tracklist is not None else "",
+                "Title": title,
+                "Release": release if release is not None else "",
+                "Format": formats if formats is not None else "",
+                "Tracklist": list(tracklist) if tracklist is not None else "",
             }
         )
     time.sleep(0.9)
